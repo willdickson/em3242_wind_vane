@@ -7,7 +7,7 @@
         type="is-dark" 
         size="is-medium"
         > 
-        <strong> {{switchMessage}}    &nbsp &nbsp  {{fileName}} </strong>
+        <strong> {{switchMessage}} &nbsp &nbsp  {{fileName}} &nbsp &nbsp {{sampleInfo}} </strong>
       </b-switch>
     </div>
   </div>
@@ -28,23 +28,33 @@ export default {
   computed: {
     switchMessage() { 
       if (this.switchState) {
-        return 'Logging On, ';
+        return 'Logging On,';
       } else {
         return 'Logging Off';
       }
     },
     fileName() {
       if (this.switchState) {
-        return 'filename = ' + this.$store.state.loggingState.fileName;
+        return 'filename: ' + this.$store.state.loggingState.fileName + ','; 
       } else {
         return null;
       }
     },
-    ...mapState(['loggingState'])
+    sampleInfo() {
+      if (this.switchState) {
+        return 'samples: ' + this.numberOfSamples;
+      } else {
+        return null;
+      }
+    },
+    ...mapState([
+      'loggingState',
+      'numberOfSamples'
+    ])
   },
   methods: {
     onSwitchInput() {
-      //console.log(this.switchState);
+      console.log('onSwitchInput: ' + this.switchState);
       if (this.switchState) {
         this.$store.state.socket.emit('startLogging', {});
       } else {
@@ -57,7 +67,7 @@ export default {
       //console.log('new: ' + JSON.stringify(newLoggingState));
       //console.log('old: ' + JSON.stringify(oldLoggingState));
       this.switchState = newLoggingState.enabled;
-    }
+    },
   }
 }
 </script>

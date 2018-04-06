@@ -35,6 +35,7 @@ new Vue({
     socket.on('data', (data) => {
       //console.log(data.angle);
       this.$store.commit('setAngle',data.angle);
+      this.$store.commit('setNumberOfSamples', data.numberOfSamples);
     });
 
     socket.on('datetime', (data) => {

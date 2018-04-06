@@ -1,7 +1,8 @@
 <template>
   <div id="app">
 
-    <div class="container is-fluid">
+    <!-- <div class="container is-fluid"> -->
+    <div class="container">
 
       <section class="hero is-dark">
         <div class="hero-body">
@@ -16,7 +17,8 @@
         </div>
       </section>
 
-      <div class="section is-fluid level">
+      <!-- <div class="section is-fluid level"> -->
+      <div class="section level">
         <SaveDataSwitch/>
       </div>
 

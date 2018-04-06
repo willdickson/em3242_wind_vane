@@ -20,6 +20,7 @@ const serialPortName = '/dev/ttyACM0';
 const networkPort = 5000;
 const logFilePrefix = 'wind_vane_';
 const dateTimerInterval = 250;
+const portCheckInterval = 1000;
 const logDirectory = path.join(process.env.HOME,'wind_vane_data');
 const clientDistDir = path.join(__dirname, '../wind_vane_client/dist');
 const staticFileDir = path.join(clientDistDir, 'static');
@@ -38,11 +39,12 @@ let loggingState = {
   enabled: false,
   fileName: null,
   directoryExists: false,
+  numberOfSamples: 0
 }
 let logfd = null;
 
 
-async function createLogDirectory() {
+let createLogDirectory = async function() {
   let dirExists = true;
   try {
     let stats = await stat(logDirectory);
@@ -73,8 +75,12 @@ io.on('connection', function (socket) {
   socket.emit('loggingState', loggingState);
 
   socket.on('startLogging', async function (data) {
+    if (loggingState.enabled) {
+      return;
+    }
     loggingState.enabled = true;
     loggingState.fileName = logFilePrefix + timestamp('YYYY_MM_DD_HH_mm_ss.txt');
+    loggingState.numberOfSamples = 0;
     let logFileFullPath = path.join(logDirectory,loggingState.fileName);
     try {
       logfd = await open(logFileFullPath,'w');
@@ -103,29 +109,57 @@ io.on('connection', function (socket) {
 
 });
 
-setInterval(function() {
+setInterval( function() {
   let datetime = timestamp('YYYY/MM/DD HH:mm:ss');
   io.emit('datetime', {'datetime': datetime});
 }, dateTimerInterval);
 
 
-// Setup serial por
+// Setup serial port
 // --------------------------------------------------------------------------------------
-let port = new SerialPort(serialPortName, {baudRate: 115200})
 
-port.on('open', function () {
-  console.log('* USB serial port ' + serialPortName + ' opened');
-});
+let serialPortOpen = false;
 
-port.on('data', async function (data) {
-  let angle = Number(data);
-  io.emit('data', {angle: angle});
-  if (loggingState.enabled && (logfd !== null)) {
-    let unixTime = moment().valueOf()/1000.0;
-    let dataLine = unixTime + ' ' + angle;
-    await write(logfd,dataLine + '\n');
+let setupSerialPort = async function() {
+
+  let port = new SerialPort(serialPortName, {baudRate: 115200}) 
+    
+  port.on('open', function () {
+      console.log('* USB serial port ' + serialPortName + ' opened'); 
+      serialPortOpen = true;
+  });
+
+  port.on('close', function() {
+    console.log('* USB serial port ' + serialPortName + ' closed');
+    serialPortOpen = false;
+  });
+
+  port.on('data', async function (data) {
+    let angle = Number(data);
+    loggingState.numberOfSamples += 1;
+
+    io.emit('data', {
+      angle: angle, 
+      numberOfSamples: loggingState.numberOfSamples
+    });
+    if (loggingState.enabled && (logfd !== null)) {
+      let unixTime = moment().valueOf()/1000.0;
+      let dataLine = unixTime + ' ' + angle;
+      await write(logfd,dataLine + '\n');
+    }
+  });
+
+};
+
+setInterval( function() {
+  if (serialPortOpen) {
+    return;
   }
-});
+  setupSerialPort();
+}, portCheckInterval);
+
+
+
 
 
 
