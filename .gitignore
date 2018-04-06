@@ -1,0 +1,5 @@
+*~
+*.egg-info
+*.pyc
+software/python/live_plot/data.txt
+node_modules
