@@ -2,8 +2,8 @@
 
 Software and firmare for the EM3242 based wind vane sensors.
 
-## Installation
 
-TODO
+![screenshot_0](images/screenshot_0.png)
+
 
 
