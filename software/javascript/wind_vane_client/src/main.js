@@ -7,7 +7,7 @@ import App from './App';
 import io from 'socket.io-client'
 import {store} from './store';
 
-const develop = true; 
+const develop = false; 
 
 Vue.use(Buefy)
 Vue.config.productionTip = false;

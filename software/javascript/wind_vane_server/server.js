@@ -67,7 +67,7 @@ loggingState.directoryExists = createLogDirectory()
 // --------------------------------------------------------------------------------------
 
 app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, '../wind_vane_client/dist/index.html'));
+    res.sendFile(path.join(clientDistDir,'index.html'));
 });
 
 io.on('connection', function (socket) {

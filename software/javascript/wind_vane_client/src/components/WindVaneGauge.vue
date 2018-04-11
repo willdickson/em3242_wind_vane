@@ -22,6 +22,7 @@
       data-color-needle-end="rgba(255, 160, 122, .9)"
       data-value-box="true"
       data-value-text-shadow="false"
+      data-value-dec="1"
       data-color-circle-inner="#fff"
       data-color-needle-circle-outer="#ccc"
       data-needle-circle-size="15"
@@ -55,7 +56,7 @@ export default {
   },
   computed: {
     angle() {
-      return this.$store.state.angle.toFixed(0);
+      return this.$store.state.angle.toFixed(1);
     }
   },
   mounted: function() {
