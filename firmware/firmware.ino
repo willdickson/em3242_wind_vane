@@ -1,6 +1,9 @@
 const uint16_t AinPin = A1;
 const uint16_t AinReadResolution = 16;
 const uint16_t AinMaxValue = uint16_t((uint32_t(1) << AinReadResolution) -1);
+const uint32_t LoopDelayDt_ms = 50;
+
+
 
 float ain_to_degree(uint16_t ain)
 {
@@ -22,10 +25,31 @@ void setup()
 
 void loop() 
 {
+    static bool sending = false;
+
+    while (Serial.available() > 0)
+    {
+        uint8_t cmd = Serial.read();
+
+        switch (cmd) 
+        {
+            case 'b':
+                sending = true;
+                break;
+
+            case 'e':
+                sending = false;
+                break;
+        }
+    }
+
     uint16_t ain = analogRead(AinPin);
     float angle = ain_to_degree(ain);
-    Serial.println(angle);
-    delay(50);
+    if (sending) 
+    {
+        Serial.println(angle);
+    }
+    delay(LoopDelayDt_ms);
 }
 
 

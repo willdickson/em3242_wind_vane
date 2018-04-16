@@ -3,6 +3,7 @@ import time
 import serial
 import matplotlib
 import matplotlib.pyplot as plt
+import signal
 
 
 class EM3242LivePlot(serial.Serial):
@@ -15,11 +16,15 @@ class EM3242LivePlot(serial.Serial):
         super(EM3242LivePlot,self).__init__(port,**param)
         time.sleep(self.ResetSleepDt)
 
+
         self.window_size = 10.0
 
         self.t_init =  time.time()
         self.t_list = []
         self.angle_list = []
+
+        self.running = False
+        signal.signal(signal.SIGINT, self.sigint_handler)
 
         plt.ion()
         self.fig = plt.figure(1)
@@ -35,11 +40,18 @@ class EM3242LivePlot(serial.Serial):
         self.angle_line.set_ydata([])
         self.fig.canvas.flush_events()
 
+
+    def sigint_handler(self,signum,frame):
+        self.running = False
+
     def run(self):
 
 
+        self.write('b\n')
+        self.running = True
+
         with open('data.txt', 'w') as fid:
-            while True:
+            while self.running:
                 have_data = False
                 while self.in_waiting > 0:
                     line = self.readline()
@@ -64,6 +76,8 @@ class EM3242LivePlot(serial.Serial):
                     fid.write('{0} {1}\n'.format(t_elapsed, angle))
                     print(angle)
 
+        print('quiting')
+        self.write('e\n')
 
 
 
@@ -72,7 +86,6 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1:
         port = sys.argv[1]
-
 
     liveplot = EM3242LivePlot(port=port)
     liveplot.run()
