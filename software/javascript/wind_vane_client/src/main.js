@@ -7,7 +7,6 @@ import App from './App';
 import io from 'socket.io-client'
 import {store} from './store';
 
-const develop = false; 
 
 Vue.use(Buefy)
 Vue.config.productionTip = false;
@@ -19,10 +18,13 @@ new Vue({
   components: { App },
   template: '<App/>',
   mounted: function() { 
+    // Setup socket
     let socket = null;
-    if (develop) {
+    if (location.port === '8080') {
+      // Using development server
       socket = io.connect('http://localhost:5000');
     } else {
+      // Running as webapp
       socket = io.connect('http://' + document.domain  + ':' + location.port);
     }
     store.commit('setSocket', socket);
